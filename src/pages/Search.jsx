@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../Components/Header';
 import Loading from '../Components/Loading';
+import searchAlbumsAPI from '../services/searchAlbumsAPI';
 
 class Search extends Component {
   state = {
     artist: '',
     isButtonDisabled: true,
     loading: false,
+    response: [],
+    responseName: '',
   };
 
   handleChange = ({ target }) => {
@@ -17,13 +21,25 @@ class Search extends Component {
     });
   };
 
+  handleSubmit = (e) => {
+    const { artist } = this.state;
+    e.preventDefault();
+    this.setState({ loading: true }, () => {
+      searchAlbumsAPI(artist).then((result) => this.setState({
+        responseName: artist,
+        artist: '',
+        loading: false,
+        response: result,
+      }));
+    });
+  };
+
   render() {
-    const { artist, isButtonDisabled, loading } = this.state;
+    const { artist, isButtonDisabled, loading, response, responseName } = this.state;
     return (
       <div data-testid="page-search">
         <Header />
-        {loading ? <Loading /> : null}
-        <form action="">
+        <form onSubmit={ this.handleSubmit }>
           <input
             type="text"
             name=""
@@ -42,7 +58,26 @@ class Search extends Component {
           </button>
         </form>
 
-        Search
+        {(!loading && responseName && response.length === 0) && (
+          <div>
+            <p>Nenhum álbum foi encontrado</p>
+          </div>
+        )}
+
+        {(response.length > 0) && <p>{`Resultado de álbuns de: ${responseName}`}</p>}
+        {loading ? <Loading /> : (response.map((album) => (
+          <div key={ album.collectionId }>
+            <Link
+              data-testid={ `link-to-album-${album.collectionId}` }
+              to={ `/album/${album.collectionId}` }
+            >
+              Link
+            </Link>
+            <img src={ album.artworkUrl100 } alt={ album.title } />
+            <h2>{album.artistName}</h2>
+            <h3>{album.collectionName}</h3>
+          </div>
+        )))}
       </div>
     );
   }
