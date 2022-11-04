@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import Header from '../Components/Header';
 import MusicCard from '../Components/MusicCard';
 import getMusics from '../services/musicsAPI';
+import Loading from '../Components/Loading';
 
 class Album extends Component {
   state = {
     collectionName: '',
     artistName: '',
     songs: [],
+    loading: false,
   };
 
   componentDidMount() {
@@ -23,10 +25,11 @@ class Album extends Component {
   }
 
   render() {
-    const { songs, collectionName, artistName } = this.state;
+    const { songs, collectionName, artistName, loading } = this.state;
     return (
       <div data-testid="page-album">
         <Header />
+        {loading ? <Loading /> : null}
         <h2 data-testid="album-name">{collectionName}</h2>
         <h3 data-testid="artist-name">{artistName}</h3>
         <ul>
@@ -36,6 +39,9 @@ class Album extends Component {
               trackName={ song.trackName }
               previewUrl={ song.previewUrl }
               trackId={ song.trackId }
+              // isFavorite={ favorites.some(
+              //   (favorite) => favorite.trackId === song.trackId,
+              // ) }
             />
           ))}
         </ul>

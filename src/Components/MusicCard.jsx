@@ -1,30 +1,50 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { addSong, removeSong } from '../services/favoriteSongsAPI';
+import { addSong, getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
 import Loading from './Loading';
 
 class MusicCard extends Component {
-  state = {
-    loading: false,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+      checked: false,
+    };
+  }
 
-  toggleSong = (trackId, callback) => {
+  componentDidMount() {
+    const { trackId } = this.props;
+    this.setState({ loading: true }, () => {
+      getFavoriteSongs().then((result) => this.setState({
+        checked: result.some((favorite) => favorite.trackId === trackId),
+        loading: false,
+      }));
+    });
+  }
+
+  toggleSong = (trackId, callback, checked) => {
     this.setState({ loading: true }, () => {
       callback(trackId).then(() => this.setState({
         loading: false,
+        checked,
       }));
     });
   };
 
   favoriteToggle = ({ target }) => {
-    const { trackId } = this.props;
+    const { trackId, trackName } = this.props;
+    const songObject = {
+      trackId,
+      name: trackName,
+    };
     return (target.checked
-      ? this.toggleSong(trackId, addSong) : this.toggleSong(trackId, removeSong));
+      ? this.toggleSong(songObject, addSong, true)
+      : this.toggleSong(songObject, removeSong, false));
   };
 
   render() {
     const { trackName, previewUrl, trackId } = this.props;
-    const { loading } = this.state;
+    const { loading, checked } = this.state;
     return (
       <li key={ trackId }>
         <h4>{trackName}</h4>
@@ -37,6 +57,7 @@ class MusicCard extends Component {
             id={ trackId }
             data-testid={ `checkbox-music-${trackId}` }
             onChange={ this.favoriteToggle }
+            checked={ checked }
           />
         </label>
         {loading ? <Loading /> : null}
