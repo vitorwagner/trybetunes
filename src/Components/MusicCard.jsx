@@ -32,11 +32,13 @@ class MusicCard extends Component {
   };
 
   favoriteToggle = ({ target }) => {
-    const { trackId, trackName } = this.props;
+    const { trackId, trackName, previewUrl, toggleShowHide } = this.props;
     const songObject = {
       trackId,
-      name: trackName,
+      trackName,
+      previewUrl,
     };
+    toggleShowHide();
     return (target.checked
       ? this.toggleSong(songObject, addSong, true)
       : this.toggleSong(songObject, removeSong, false));
@@ -52,6 +54,7 @@ class MusicCard extends Component {
           <track kind="captions" />
         </audio>
         <label htmlFor={ trackId }>
+          Favorita
           <input
             type="checkbox"
             id={ trackId }
@@ -70,6 +73,11 @@ MusicCard.propTypes = {
   trackId: PropTypes.number.isRequired,
   trackName: PropTypes.string.isRequired,
   previewUrl: PropTypes.string.isRequired,
+  toggleShowHide: PropTypes.func,
+};
+
+MusicCard.defaultProps = {
+  toggleShowHide: () => {},
 };
 
 export default MusicCard;
